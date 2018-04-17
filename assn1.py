@@ -9,26 +9,32 @@ import math
 from pandas.plotting import scatter_matrix
 
 # classID: Which class of iris to be graphed
-	# 0 for wine
-	# 1 for iris-sesota
-	# 2 for iris-versicolor
-	# 3 for iris-virginica
+	# 1 for wine 1
+	# 2 for wine 2
+	# 3 for wine 3
+	# 4 for iris-sesota
+	# 5 for iris-versicolor
+	# 6 for iris-virginica
 # opID: Which operation the program should take
 	# 0 for histogram
-	# 1 for correlogram
-	# 2 for scatterplot
-	# 3 for distance heatmap
+	# 1 for boxplot
+	# 2 for correlogram
+	# 3 for scatterplot
+	# 4 for distance heatmap
 # attrID: Which attribute to be graphed on the histogram
 # attr2ID: Which second attribute to be compared to on the scatterplot
 # bunNumID: How many bins to plot on the histogram
 # uniP: Which value of p to use during distance calculation
+# bigPrint: Set to True if all possible attribute*class*bin combinations for the given
+# data set are to be drawn 
 
 
 #  ----- CHANGE THESE NUMBERS FOR DIFFERENT INPUT TO FUNCTIONS -----
-classID = 1
+bigPrint = True
+classID = 4
 attrID = 1
 attr2ID = 2
-opID = 3
+opID = 2
 binNumID = 10
 uniP = 2
 
@@ -38,7 +44,7 @@ wineAttrGroups = []
 iPts = []
 wPts = []
 iNames = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width', 'class']
-wNames = ['alcohol', 'malic-acid', 'ash', 'alcalinity-of-ash', 'magnesium', 'total-phenols', 'flavanoids', 'nonflavanoid-phenols', 'proanthocyanis', 'color-intensity', 'hue', 'OD280/OD315-of-diluted-wines', 'proline']
+wNames = ['NOPO', 'alcohol', 'malic-acid', 'ash', 'alcalinity-of-ash', 'magnesium', 'total-phenols', 'flavanoids', 'nonflavanoid-phenols', 'proanthocyanis', 'color-intensity', 'hue', 'OD280/OD315-of-diluted-wines', 'proline']
 
 # ----- QUESTION 0 -----
 
@@ -99,20 +105,26 @@ def buildHist(attrGroup, attrID, classID, binCount):
 	floors = []
 
 	# Title graph properly and isolate relevant data
-	if classID == 0:
-		plt.title(wNames[attrID])
+	if classID == 1:
+		plt.title(wNames[attrID] + ' - Wine Class 1')
+		attrGroup = attrGroup[:59]
+	elif classID == 2:
+		plt.title(wNames[attrID] + ' - Wine Class 2')
+		attrGroup = attrGroup[59:130]
+	elif classID == 3:
+		plt.title(wNames[attrID] + ' - Wine Class 3')
+		attrGroup = attrGroup[130:]
+	elif classID == 4:
+		plt.title(iNames[attrID] + ' - Iris-sesota')
+		attrGroup = attrGroup[:50]
+	elif classID == 5:
+		plt.title(iNames[attrID] + ' - Iris-versicolor')
+		attrGroup = attrGroup[50:100]
+	elif classID == 6:
+		plt.title(iNames[attrID] + ' - Iris-virginica')
+		attrGroup = attrGroup[100:]
 	else:
-		if classID == 1:
-			plt.title(iNames[attrID] + ' - Iris-sesota')
-			attrGroup = attrGroup[:50]
-		elif classID == 2:
-			plt.title(iNames[attrID] + ' - Iris-versicolor')
-			attrGroup = attrGroup[50:100]
-		elif classID == 3:
-			plt.title(iNames[attrID] + ' - Iris-virginica')
-			attrGroup = attrGroup[100:]
-		else:
-			plt.title(iNames[attrID])
+		plt.title(iNames[attrID])
 
 	# Calculate size and span of bins
 	dataMax = max(attrGroup)
@@ -136,8 +148,9 @@ def buildHist(attrGroup, attrID, classID, binCount):
 				break
 
 	# Tidy up floor values to make histogram more readable
-	for f in range(len(floors)-1):
-		floors[f] = str(floors[f]) + '-' + str(floors[f+1])
+	if binCount < 50:
+		for f in range(len(floors)-1):
+			floors[f] = str(floors[f]) + '-' + str(floors[f+1])
 	floors = floors[:-1]
 
 	print floors
@@ -145,9 +158,24 @@ def buildHist(attrGroup, attrID, classID, binCount):
 
 	# Aesthetics of histogram
 	plt.bar(floors, bins, binSpan, color='lime')
-	plt.xticks(floors)
-	ax = plt.gca()
-	plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+	if binCount < 50:
+		plt.xticks(floors)
+		ax = plt.gca()
+		plt.setp(ax.get_xticklabels(), rotation=30, ha="right", rotation_mode="anchor")
+
+# ----- QUESTION 1 ~ PART 2 -----
+
+def boxPlot(attrGroup, attrID, classID):
+	if classID >= 4:
+		plt.boxplot([attrGroup[:50], attrGroup[50:100], attrGroup[100:]])
+		plt.xticks([1, 2, 3], ['Iris-setosa', 'Iris-versicolor', 'Iris-virginica'])
+		plt.title(iNames[attrID])
+	else:
+		plt.boxplot([attrGroup[:59], attrGroup[59:130], attrGroup[130:]])
+		plt.xticks([1, 2, 3], ['Wine Class 1', 'Wine Class 2', 'Wine Class 3'])
+		plt.title(wNames[attrID])
+
+
 
 # ----- QUESTION 2 ~ PART 1 -----
 
@@ -166,7 +194,7 @@ def correlation(x, y):
 def corrMatBuilder(attrSet, classID):
 	# Adjust loop range for given dataset
 	attrLen = len(attrSet)
-	if classID > 0:
+	if classID >= 4:
 		attrLen += -1
 
 	# Fill matrix with dead value
@@ -189,10 +217,10 @@ def corrMatBuilder(attrSet, classID):
 # Draws a heatmap from the given correlation matrix
 def corrHeatMapper(corrMat, classID):
 	plt.imshow(corrMat, cmap='RdYlGn', interpolation='nearest')
-	if classID == 0:
+	if classID < 4:
 		plt.title('Wine Attribute Correlations')
-		plt.xticks(range(len(wNames)), wNames)
-		plt.yticks(range(len(wNames)), wNames)
+		plt.xticks(range(len(wNames-1)), wNames[-1:])
+		plt.yticks(range(len(wNames-1)), wNames[-1:])
 	else:
 		plt.title('Iris Attribute Correlations')
 		plt.xticks(range(len(iNames)-1), iNames[:-1])
@@ -273,7 +301,7 @@ def nearestPt(distMat, classID):
 			if distMat[i][j] != 0.0 and distMat[i][j] < iMin:
 				iMin = distMat[i][j]
 				iIndex = j
-		if classID == 0:
+		if classID < 4:
 			print ('Wine ' + str(i) + '\'s Nearest Wine: Wine ' + str(iIndex))
 		else:
 			print ('Iris ' + str(i) + '\'s (Class: ' + iPts[i][4] + ') Nearest Iris: Iris ' + str(iIndex) + ' (Class: ' + iPts[iIndex][4] + ')')
@@ -284,7 +312,7 @@ def main():
 	mainAttr = []
 	mainAttrGroups = []
 	mainPts = []
-	if classID == 0:
+	if classID < 4:
 		mainAttr = wineAttrGroups[attrID]
 		mainAttrGroups = wineAttrGroups
 		mainPts = wPts
@@ -294,12 +322,30 @@ def main():
 		mainPts = iPts
 
 	if opID == 0:
-		buildHist(mainAttr, attrID, classID, binNumID)
+		if bigPrint:
+			classList = [1, 2, 3]
+			attrList = [1, 2, 3]
+			binList = [5, 10, 50, 100]
+			for curAttr in attrList:
+				for curClass in classList:
+					for curBin in binList:
+						buildHist(wineAttrGroups[curAttr], curAttr, curClass, curBin)
+						plt.show()
+						exit(0)
+		else:
+			buildHist(mainAttr, attrID, classID, binNumID)
 	elif opID == 1:
+		if bigPrint:
+			attrPath = [1, 2, 3]
+			for curAttr in attrPath:
+				boxPlot(wineAttrGroups[curAttr], curAttr, 0)
+				plt.show()
+			exit(0)
+	elif opID == 2:
 		corrMat = corrMatBuilder(mainAttrGroups, classID)
 		print corrMat
 		corrHeatMapper(corrMat, classID)
-	elif opID == 2:
+	elif opID == 3:
 		scPlot(irisAttrGroups[attrID], irisAttrGroups[attr2ID])
 	else:
 		distMat = []
