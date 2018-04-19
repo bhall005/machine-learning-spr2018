@@ -76,7 +76,7 @@ def readNParse(irisFile, wineFile):
 	for r in range(len(wChunks)):
 		temp = []
 		splitChunk = wChunks[r].split(',')
-		for c in range(len(wNames)):
+		for c in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]:
 			temp.append(float(splitChunk[c]))
 		wPts.append(temp)
 
@@ -96,6 +96,8 @@ def readNParse(irisFile, wineFile):
 		for l in range(len(wChunks)):
 			temp.append(float(wChunks[l].split(',')[k]))
 		wineAttrGroups.append(temp)
+
+	print wPts
 
 # ----- QUESTION 1 -----
 
@@ -312,7 +314,21 @@ def nearestPt(distMat, classID):
 				iMin = distMat[i][j]
 				iIndex = j
 		if classID < 4:
-			print ('Wine ' + str(i) + '\'s (Class: ' + str(wPts[i][0]) + ') Nearest Wine: Wine ' + str(iIndex) + ' (Class: ' + str(wPts[iIndex][0]) + ')')
+			iClass = ''
+			indClass = ''
+			if i < 59:
+				iClass = '1'
+			elif i >= 59 and i < 130:
+				iClass = '2'
+			else:
+				iClass = '3'
+			if iIndex < 59:
+				indClass = '1'
+			elif iIndex >= 59 and iIndex < 130:
+				indClass = '2'
+			else:
+				indClass = '3'
+			print ('Wine ' + str(i) + '\'s (Class: ' + iClass + ') Nearest Wine: Wine ' + str(iIndex) + ' (Class: ' + indClass + ')')
 		else:
 			print ('Iris ' + str(i) + '\'s (Class: ' + iPts[i][4] + ') Nearest Iris: Iris ' + str(iIndex) + ' (Class: ' + iPts[iIndex][4] + ')')
 
@@ -359,13 +375,13 @@ def main():
 		scPlot(irisAttrGroups[attrID], irisAttrGroups[attr2ID])
 	else:
 		distMat = []
-		if classID != 0:
+		if classID >= 4:
 			tempPts = []
 			for z in mainPts:
 				tempPts.append(z[:-1])
 			distMat = distMatBuilder(tempPts, uniP)
 		else:
-			distMat = distMatBuilder(mainPts[1:], uniP)
+			distMat = distMatBuilder(mainPts, uniP)
 		print distMat
 		nearestPt(distMat, classID)
 		distHeatMapper(distMat, classID)
