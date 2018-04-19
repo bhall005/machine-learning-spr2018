@@ -31,10 +31,10 @@ from pandas.plotting import scatter_matrix
 
 #  ----- CHANGE THESE NUMBERS FOR DIFFERENT INPUT TO FUNCTIONS -----
 bigPrint = True
-classID = 4
-attrID = 1
-attr2ID = 2
-opID = 2
+classID = 1
+attrID = 0
+attr2ID = 1
+opID = 4
 binNumID = 10
 uniP = 2
 
@@ -219,8 +219,8 @@ def corrHeatMapper(corrMat, classID):
 	plt.imshow(corrMat, cmap='RdYlGn', interpolation='nearest')
 	if classID < 4:
 		plt.title('Wine Attribute Correlations')
-		plt.xticks(range(len(wNames-1)), wNames[-1:])
-		plt.yticks(range(len(wNames-1)), wNames[-1:])
+		plt.xticks(range(len(wNames)-1), wNames[1:])
+		plt.yticks(range(len(wNames)-1), wNames[1:])
 	else:
 		plt.title('Iris Attribute Correlations')
 		plt.xticks(range(len(iNames)-1), iNames[:-1])
@@ -239,16 +239,26 @@ def corrHeatMapper(corrMat, classID):
 
 # Draws a scatterplot from the given pairs of attributes
 def scPlot(x, y):
-	plt.scatter(x[:50], y[:50], s=14.0, marker='o',c='indigo')
-	plt.scatter(x[50:100], y[50:100], s=14.0, marker='o',c='purple')
-	plt.scatter(x[100:], y[100:], s=14.0, marker='o',c='magenta')
+	if classID >= 4:
+		setosaDot = plt.scatter(x[:50], y[:50], s=14.0, marker='o',c='indigo')
+		versicolorDot = plt.scatter(x[50:100], y[50:100], s=14.0, marker='o',c='purple')
+		virginicaDot = plt.scatter(x[100:], y[100:], s=14.0, marker='o',c='magenta')
 
-	plt.title(iNames[attrID] + ' vs. ' + iNames[attr2ID])
-	plt.xlabel(iNames[attrID])
-	plt.ylabel(iNames[attr2ID])
+		plt.title(iNames[attrID] + ' vs. ' + iNames[attr2ID])
+		plt.xlabel(iNames[attrID])
+		plt.ylabel(iNames[attr2ID])
+		plt.legend([setosaDot, versicolorDot, virginicaDot], ['Setosa', 'Versicolor', 'Virginica'])
+	else:
+		dot1 = plt.scatter(x[:59], y[:59], s=14.0, marker='o',c='crimson')
+		dot2 = plt.scatter(x[59:130], y[59:130], s=14.0, marker='o',c='scarlet')
+		dot3 = plt.scatter(x[130:], y[130:], s=14.0, marker='o',c='maroon')
 
-# ----- QUESTION 2 ~ PART 3 -----
+		plt.title(wNames[attrID] + ' vs. ' + wNames[attr2ID])
+		plt.xlabel(wNames[attrID])
+		plt.ylabel(wNames[attr2ID])
+		plt.legend([dot1, dot2, dot3], ['Wine Class 1', 'Wine Class 2', 'Wine Class 3'])
 
+# ----- QUESTION 2 ~ PART 3 ----- 
 # Computes the Lp norm from the given sets of data points using the given
 # value of p
 def distance(x, y, p):
@@ -281,7 +291,7 @@ def distMatBuilder(dataPts, p):
 # Draws a heatmap from the given distance matrix
 def distHeatMapper(distMat, classID):
 	plt.imshow(distMat, interpolation='nearest')
-	if classID == 0:
+	if classID < 4:
 		plt.title('Wine Data Point Distances (p = ' + str(uniP) + ')')
 	else:
 		plt.title('Iris Data Point Distances (p = ' + str(uniP) + ')')
@@ -302,7 +312,7 @@ def nearestPt(distMat, classID):
 				iMin = distMat[i][j]
 				iIndex = j
 		if classID < 4:
-			print ('Wine ' + str(i) + '\'s Nearest Wine: Wine ' + str(iIndex))
+			print ('Wine ' + str(i) + '\'s (Class: ' + str(wPts[i][0]) + ') Nearest Wine: Wine ' + str(iIndex) + ' (Class: ' + str(wPts[iIndex][0]) + ')')
 		else:
 			print ('Iris ' + str(i) + '\'s (Class: ' + iPts[i][4] + ') Nearest Iris: Iris ' + str(iIndex) + ' (Class: ' + iPts[iIndex][4] + ')')
 
@@ -314,7 +324,7 @@ def main():
 	mainPts = []
 	if classID < 4:
 		mainAttr = wineAttrGroups[attrID]
-		mainAttrGroups = wineAttrGroups
+		mainAttrGroups = wineAttrGroups[1:]
 		mainPts = wPts
 	else:
 		mainAttr = irisAttrGroups[attrID]
@@ -355,7 +365,7 @@ def main():
 				tempPts.append(z[:-1])
 			distMat = distMatBuilder(tempPts, uniP)
 		else:
-			distMat = distMatBuilder(mainPts, uniP)
+			distMat = distMatBuilder(mainPts[1:], uniP)
 		print distMat
 		nearestPt(distMat, classID)
 		distHeatMapper(distMat, classID)
