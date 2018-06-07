@@ -8,7 +8,7 @@ import pandas
 import math
 import copy
 from pandas.plotting import scatter_matrix
-from random import sample, seed
+from random import sample, seed, randint
 from numpy.random import choice
 
 #  ----- CHANGE THESE NUMBERS FOR DIFFERENT INPUT TO FUNCTIONS -----
@@ -44,7 +44,7 @@ def distance(x, y):
   tmp = 0
   for i in range(len(x)):
     tmp += np.square(abs(float(x[i]) - float(y[i])))
-  return tmp
+  return np.sqrt(tmp)
 
 # Determines the closest centroid to a point x
 # Returns the index of the closest centroid
@@ -64,7 +64,8 @@ def sse(x_input, cluster_assignments, cluster_centroids):
 	tmp = 0
 	# Calculate the sum of all data points to its assigned centroid squared
 	for i in range(len(x_input)):
-		tmp += np.square(distance(x_input[i], cluster_centroids[cluster_assignments[i]]))
+		dipo = distance(x_input[i], cluster_centroids[cluster_assignments[i]])
+		tmp += np.square(dipo)
 	return tmp
 
 
@@ -164,6 +165,8 @@ def kmeans_sensitivity_analysis(iPts):
 			loopCnt = 0
 			iter_y_vals = []
 			while loopCnt < max_iter:
+				# Ensure true random initialization
+				seed(randint(0, 100))
 				init_centroids = sample(iPts, k)
 
 				cluster_assignments, cluster_centroids = k_means_cs171(iPts, k, init_centroids)
@@ -236,6 +239,8 @@ def kmeans_plusplus_sensitivity_analysis(iPts):
 			loopCnt = 0
 			iter_y_vals = []
 			while loopCnt < max_iter:
+				# Ensure true random initialization
+				seed(randint(0, 100))
 				init_centroids = sample(iPts, k)
 
 				cluster_assignments, cluster_centroids = kmeans_plusplus(iPts, k)
@@ -254,13 +259,25 @@ def main():
 	init_centroids = sample(iPts, 3)
 
 	#cluster_assignments, cluster_centroids = k_means_cs171(iPts, 3, init_centroids)
+	#print 'Cluster Assignments:'
 	#print cluster_assignments
+	#print 'Cluster Centroids:'
 	#print cluster_centroids
+	#print 'Sum of Squares of Errors:'
 	#print sse(iPts, cluster_assignments, cluster_centroids)
 
 	#multiple_k_means(iPts)
 
 	#kmeans_sensitivity_analysis(iPts)
+
+	#cluster_assignments, cluster_centroids = kmeans_plusplus(iPts, 3)
+	#print 'Cluster Assignments:'
+	#print cluster_assignments
+	#print 'Cluster Centroids:'
+	#print cluster_centroids
+	#print 'Sum of Squares of Errors:'
+	#print sse(iPts, cluster_assignments, cluster_centroids)
+
 	kmeans_plusplus_sensitivity_analysis(iPts)
 
 
